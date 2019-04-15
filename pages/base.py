@@ -5,6 +5,8 @@ from time import sleep
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import StaleElementReferenceException, TimeoutException, NoSuchElementException
 
 from components.navbars import HomeNavbar
 from base.locators import BaseElement, ComponentLocator
@@ -114,3 +116,44 @@ class GuidBasePage(OSFBasePage):
             return self.base_url.format(guid=self.guid)
         else:
             raise ValueError('No space in base_url for GUID specified.')
+
+
+class EmbOSFBasePage(OSFBasePage):
+    """
+    EmbOSF-ed pages set ``document.prerenderReady`` equals to 
+    """
+
+    # def __init__(self, driver, verify=False, *args):
+    def __init__(self, driver, verify=False):
+        super().__init__(driver, verify)
+
+    def verify(self):
+        """Verify that you are on the expected page by confirming the page's `identity`
+        element is present on the page.
+        """
+
+        try:
+            WebDriverWait(self.driver, settings.VERY_LONG_TIMEOUT).until(
+                page_is_prerendered()
+            )
+        except(TimeoutException, StaleElementReferenceException):
+            raise ValueError('Embosed page never finished loading') from None
+
+        return super().verify()
+
+    # def _prerender_is_ready(self):
+    #     return self.driver.execute_script('return window.prerenderReady;') == 'complete'
+
+
+class page_is_prerendered(object):
+    """An expectation for checking that an element has a particular css class.
+
+    locator - used to find the element
+    returns the WebElement once it has the particular css class
+    """
+    def __init__(self):
+        pass
+
+    def __call__(self, driver):
+        # return True
+        return driver.execute_script('return window.prerenderReady;') == 'complete'
