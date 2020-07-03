@@ -103,7 +103,7 @@ class PreprintDiscoverPage(BasePreprintPage):
 
 
 class PreprintDetailPage(GuidBasePage, BasePreprintPage):
-    url_base = urljoin(settings.OSF_HOME, '{guid}')
+    url_base = urljoin(settings.OSF_HOME, '{guid}') + '/'
 
     identity = Locator(By.ID, 'preprintTitle', settings.LONG_TIMEOUT)
     title = Locator(By.ID, 'preprintTitle', settings.LONG_TIMEOUT)
